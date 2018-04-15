@@ -1,4 +1,5 @@
-
+var Promise = require('bluebird');
+var config = require('../config/config');
 /* Contains core utility functions */
 module.exports = (function() {
     'use strict';
@@ -9,6 +10,30 @@ module.exports = (function() {
 
         return mongoose.connection.readyState !== 1
 
+    };
+
+    var aws = {
+        uploadImage: function  uploadImageToS3(type, name, imageBuffer) {
+            // AWS Middleware
+            var aws = require('aws-sdk');
+            aws.config.update({
+                accessKeyId: config.aws.accessKeyId,
+                secretAccessKey: config.aws.secretAccessKey,
+                region: config.aws.region
+            });
+            var s3 = new aws.S3();
+            var fileName = 'assets/images/' + type + '/' + name;
+            var params = config.aws.params;
+            params.Key = fileName;
+            params.Body = imageBuffer;
+            Promise.promisifyAll(Object.getPrototypeOf(s3));
+
+            return s3.putObjectAsync(params).then(function(data) {
+                return Promise.resolve('https://appics.s3.amazonaws.com/' + fileName);
+            }).catch(function(err) {
+                return Promise.reject(err);
+            })
+        }
     };
 
     // Response builder for all API responses.
@@ -59,6 +84,7 @@ module.exports = (function() {
 
     return {
         isMongoConnAlive: isMongoConnAlive,
-        responseBuilder: responseBuilder
+        responseBuilder: responseBuilder,
+        aws: aws
     };
 }());
