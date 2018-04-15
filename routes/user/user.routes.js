@@ -25,7 +25,6 @@ module.exports = function(router, utils) {
 
 //Save User
     router.post('/', function(req, res){
-        console.log('Save User run');
         UserService.create(req.body.user).then(function(responseObj) {
             utils.responseBuilder.handleSuccess(UtilsModule, 'Create', res, responseObj);
         }).catch( function(err) {

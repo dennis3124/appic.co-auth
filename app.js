@@ -74,7 +74,7 @@ app.listen(port, function() {
 
 // root
 app.get('/', function(req, res) {
-    res.send('Welcome to Appic.co API service root');
+    res.send('Welcome to Appic.co API auth root');
 });
 
 app.use('/api', apiRoutes);

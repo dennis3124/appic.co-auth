@@ -5,39 +5,52 @@ var config = require('../../config/config');
 var Schema = mongoose.Schema;
 
 var userSchema = new Schema({
-    FirstName: {
+    firstName: {
         type: String,
         required: true
     },
-    LastName: {
+    lastName: {
         type: String,
         required: true
     },
-    Email: {
+    email: {
         required: true,
         unique: true,
         type: String
     },
-    Phone: {
+    phone: {
         type: String
     },
-    Gender: {
+    gender: {
         type: String
     },
-    Age: {
+    age: {
         type: Number
     },
-    State: {
+    state: {
         type: String
     },
-    City: {
+    city: {
         type: String
     },
-    Zip: {
+    zip: {
         type: String
     },
-    Country: {
+    country: {
         type: String
+    },
+    company: [{
+       type: Schema.Types.ObjectId
+    }],
+    favorites: [{
+        type: Schema.Types.ObjectId
+    }],
+    following: [{
+        type: Schema.Types.ObjectId
+    }],
+    type: {
+        type: String,
+        enum: [1, 2]
     },
     salt: String,
     hash: String
@@ -52,6 +65,7 @@ userSchema.methods.setPassword = function(password) {
 }
 
 userSchema.methods.validPassword = function(password) {
+    var stringPwd = password.toString();
     var hash = crypto.pbkdf2Sync(password, this.salt, 1000, 64, 'sha512').toString('hex');
     return this.hash === hash;
 };
@@ -62,8 +76,8 @@ userSchema.methods.generateJwt = function() {
 
     return jwt.sign({
         _id: this._id,
-        email: this.Email,
-        name: this.FirstName + ' ' + this.LastName,
+        email: this.email,
+        name: this.firstName + ' ' + this.lastName,
         exp: parseInt(expiry.getTime() / 1000),
     }, config.jwt.secret); // DO NOT KEEP YOUR SECRET IN THE CODE!
 };
