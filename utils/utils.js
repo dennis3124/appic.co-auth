@@ -13,7 +13,7 @@ module.exports = (function() {
     };
 
     var aws = {
-        uploadImage: function  uploadImageToS3(type, name, imageBuffer) {
+        uploadImage: function(type, name, imageBuffer) {
             // AWS Middleware
             var aws = require('aws-sdk');
             aws.config.update({
@@ -30,6 +30,32 @@ module.exports = (function() {
 
             return s3.putObjectAsync(params).then(function(data) {
                 return Promise.resolve('https://appics.s3.amazonaws.com/' + fileName);
+            }).catch(function(err) {
+                return Promise.reject(err);
+            })
+        },
+
+        removeImage: function(fileName) {
+            console.log('test');
+            var aws = require('aws-sdk');
+            aws.config.update({
+                accessKeyId: config.aws.accessKeyId,
+                secretAccessKey: config.aws.secretAccessKey,
+                region: config.aws.region
+            });
+            var s3 = new aws.S3();
+            var params = config.aws.params;
+            params.Key = fileName;
+            delete params.Body;
+            Promise.promisifyAll(Object.getPrototypeOf(s3));
+            return new Promise(function(resolve, reject) {
+
+            })
+            return s3.deleteObject(params).then(function(data) {
+                return Promise.resolve({
+                    success: true,
+                    message: 'File Deleted'
+                })
             }).catch(function(err) {
                 return Promise.reject(err);
             })
